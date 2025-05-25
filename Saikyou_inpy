@@ -124,13 +124,12 @@ local gameTab = createTab("Game", 3)
 local settingTab = createTab("Setting", 4)
 
 -- Combatタブスクリプト
-createScriptButton(combatTab, "🌠 Infinite Yield", "loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()", 1)
+createScriptButton(combatTab, "🌠 Infinite Yield", "https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source", 1)
 createScriptButton(combatTab, "🎯 Aimbot (BLOXFORT)", "https://raw.githubusercontent.com/fatesc/fates-esp/main/main.lua", 2)
 createScriptButton(combatTab, "✨ Hitbox Script", "https://scriptblox.com/raw/Universal-Script-Update-script-hitbox-9326", 3)
 
 -- Gameタブスクリプト（Miscから移動済みも含む）
-createScriptButton(gameTab, "GunFight Arena", "loadstring(game:HttpGet("https://raw.githubusercontent.com/FASTHUB666/FASTHUB-GunFight-Arena-/refs/heads/main/GunFight%20Arena"))()
-", 1)
+createScriptButton(gameTab, "GunFight Arena", "https://raw.githubusercontent.com/FASTHUB666/FASTHUB-GunFight-Arena-/refs/heads/main/GunFight%20Arena", 1)
 
 createScriptButton(gameTab, "GroundWar", [[
 _G.Theme = "Dark"
@@ -303,7 +302,7 @@ quitBtn.MouseButton1Click:Connect(function()
 	screenGui:Destroy()
 end)
 
-
+-- RightControlで開閉
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if not gameProcessed then
 		if input.KeyCode == Enum.KeyCode.RightControl then
@@ -312,7 +311,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	end
 end)
 
-
+-- 最初にMainタブを表示
 for _, tabPage in pairs(tabs) do
 	tabPage.Visible = false
 end
