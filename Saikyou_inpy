@@ -1,11 +1,12 @@
 local player = game.Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
+local UserInputService = game:GetService("UserInputService")
 local MarketplaceService = game:GetService("MarketplaceService")
-local HttpService = game:GetService("HttpService")
 
 local screenGui = Instance.new("ScreenGui", playerGui)
 screenGui.Name = "HoshinoScriptHub"
 screenGui.ResetOnSpawn = false
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 local frame = Instance.new("Frame", screenGui)
 frame.Size = UDim2.new(0, 500, 0, 300)
@@ -14,6 +15,7 @@ frame.BackgroundColor3 = Color3.fromRGB(245, 230, 255)
 frame.BorderSizePixel = 0
 frame.Active = true
 frame.Draggable = true
+frame.ZIndex = 100  -- 最前面表示用
 
 local uiCorner = Instance.new("UICorner", frame)
 uiCorner.CornerRadius = UDim.new(0, 16)
@@ -26,21 +28,25 @@ title.Font = Enum.Font.GothamBold
 title.TextSize = 22
 title.TextColor3 = Color3.fromRGB(255, 182, 193)
 title.TextStrokeTransparency = 0.7
+title.ZIndex = 101
 
 local categoryFrame = Instance.new("Frame", frame)
 categoryFrame.Size = UDim2.new(0, 120, 1, -40)
 categoryFrame.Position = UDim2.new(0, 0, 0, 40)
 categoryFrame.BackgroundColor3 = Color3.fromRGB(220, 210, 240)
+categoryFrame.ZIndex = 101
 
 local catUICorner = Instance.new("UICorner", categoryFrame)
 catUICorner.CornerRadius = UDim.new(0, 12)
 
-local contentFrame = Instance.new("Frame", frame)
+local contentFrame = Instance.new("ScrollingFrame", frame)
 contentFrame.Size = UDim2.new(1, -130, 1, -50)
 contentFrame.Position = UDim2.new(0, 130, 0, 45)
 contentFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 contentFrame.BackgroundTransparency = 0.1
-
+contentFrame.ScrollBarThickness = 8
+contentFrame.CanvasSize = UDim2.new(0, 0, 5, 0)
+contentFrame.ZIndex = 101
 local contentCorner = Instance.new("UICorner", contentFrame)
 contentCorner.CornerRadius = UDim.new(0, 12)
 
@@ -55,14 +61,18 @@ local function createTab(name, order)
 	btn.TextSize = 16
 	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
 	btn.BackgroundColor3 = Color3.fromRGB(135, 206, 250)
+	btn.ZIndex = 102
 
 	local corner = Instance.new("UICorner", btn)
 	corner.CornerRadius = UDim.new(0, 10)
 
-	local page = Instance.new("Frame", contentFrame)
+	local page = Instance.new("ScrollingFrame", contentFrame)
 	page.Size = UDim2.new(1, 0, 1, 0)
 	page.BackgroundTransparency = 1
+	page.ScrollBarThickness = 6
+	page.CanvasSize = UDim2.new(0, 0, 5, 0)
 	page.Visible = false
+	page.ZIndex = 101
 
 	tabs[name] = page
 
@@ -85,6 +95,7 @@ local function createScriptButton(parent, text, scriptSource, order)
 	btn.TextSize = 16
 	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
 	btn.BackgroundColor3 = Color3.fromRGB(135, 206, 250)
+	btn.ZIndex = 102
 
 	local corner = Instance.new("UICorner", btn)
 	corner.CornerRadius = UDim.new(0, 10)
@@ -96,40 +107,47 @@ local function createScriptButton(parent, text, scriptSource, order)
 
 	btn.MouseButton1Click:Connect(function()
 		if scriptSource:sub(1,4) == "http" then
-			-- URLの場合は直接ロード
 			loadstring(game:HttpGet(scriptSource))()
 		else
-			-- Luaコード文字列の場合はloadstringで実行
 			loadstring(scriptSource)()
 		end
 	end)
+
+	local contentHeight = 10 + order * 50 + 10
+	parent.CanvasSize = UDim2.new(0, 0, 0, contentHeight)
 end
 
 -- タブ作成
 local mainTab = createTab("Main", 1)
 local combatTab = createTab("Combat", 2)
-local gameTab = createTab("Game", 3)  -- Utilities → Game に変更
+local gameTab = createTab("Game", 3)
 local settingTab = createTab("Setting", 4)
 
--- Combatタブのスクリプトボタン
+-- Combatタブスクリプト
 createScriptButton(combatTab, "🌠 Infinite Yield", "https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source", 1)
 createScriptButton(combatTab, "🎯 Aimbot (BLOXFORT)", "https://raw.githubusercontent.com/fatesc/fates-esp/main/main.lua", 2)
 createScriptButton(combatTab, "✨ Hitbox Script", "https://scriptblox.com/raw/Universal-Script-Update-script-hitbox-9326", 3)
 
--- Gameタブにスクリプト追加
+-- Gameタブスクリプト（Miscから移動済みも含む）
 createScriptButton(gameTab, "GunFight Arena", "https://raw.githubusercontent.com/FASTHUB666/FASTHUB-GunFight-Arena-/refs/heads/main/GunFight%20Arena", 1)
 
 createScriptButton(gameTab, "GroundWar", [[
-_G.Theme = "Dark" -- Options: Light, Dark, Red, Mocha, Aqua and Jester
+_G.Theme = "Dark"
 loadstring(game:HttpGet("https://raw.githubusercontent.com/CasperFlyModz/discord.gg-rips/main/GroundWar.lua"))()
 ]], 2)
 
 createScriptButton(gameTab, "War Tycoon", [[
-_G.Theme = "Dark" -- Options: Light, Dark, Red, Mocha, Aqua and Jester
+_G.Theme = "Dark"
 loadstring(game:HttpGet("https://raw.githubusercontent.com/CasperFlyModz/discord.gg-rips/main/WarTycoon.lua"))()
 ]], 3)
 
--- Mainタブのサーバー情報表示パーツ
+createScriptButton(gameTab, "Creator Challenge", "https://raw.githubusercontent.com/CasperFlyModz/discord.gg-rips/main/CreatorChallenge.lua", 4)
+
+createScriptButton(gameTab, "Free Admin", "https://raw.githubusercontent.com/CasperFlyModz/discord.gg-rips/main/FreeAdmin.lua", 5)
+
+createScriptButton(gameTab, "Gun Grounds FFA", "https://raw.githubusercontent.com/CasperFlyModz/discord.gg.rips/main/GunGrounds.lua", 6)
+
+-- Mainタブ：サーバー情報表示
 local infoTitle = Instance.new("TextLabel", mainTab)
 infoTitle.Size = UDim2.new(1, 0, 0, 30)
 infoTitle.Position = UDim2.new(0, 0, 0, 10)
@@ -139,6 +157,7 @@ infoTitle.Font = Enum.Font.GothamBold
 infoTitle.TextSize = 20
 infoTitle.TextColor3 = Color3.fromRGB(255, 182, 193)
 infoTitle.TextStrokeTransparency = 0.7
+infoTitle.ZIndex = 101
 
 local playersLabel = Instance.new("TextLabel", mainTab)
 playersLabel.Size = UDim2.new(1, -20, 0, 25)
@@ -148,6 +167,7 @@ playersLabel.Text = ""
 playersLabel.Font = Enum.Font.Gotham
 playersLabel.TextSize = 16
 playersLabel.TextColor3 = Color3.fromRGB(80, 80, 80)
+playersLabel.ZIndex = 101
 
 local maxPlayersLabel = Instance.new("TextLabel", mainTab)
 maxPlayersLabel.Size = UDim2.new(1, -20, 0, 25)
@@ -157,6 +177,7 @@ maxPlayersLabel.Text = ""
 maxPlayersLabel.Font = Enum.Font.Gotham
 maxPlayersLabel.TextSize = 16
 maxPlayersLabel.TextColor3 = Color3.fromRGB(80, 80, 80)
+maxPlayersLabel.ZIndex = 101
 
 local gameNameLabel = Instance.new("TextLabel", mainTab)
 gameNameLabel.Size = UDim2.new(0, 350, 0, 25)
@@ -167,16 +188,17 @@ gameNameLabel.Font = Enum.Font.Gotham
 gameNameLabel.TextSize = 16
 gameNameLabel.TextColor3 = Color3.fromRGB(80, 80, 80)
 gameNameLabel.TextXAlignment = Enum.TextXAlignment.Left
+gameNameLabel.ZIndex = 101
 
--- 📄ボタン（ゲームリンクコピー用）を少し左に移動
 local copyButton = Instance.new("TextButton", mainTab)
 copyButton.Size = UDim2.new(0, 30, 0, 25)
-copyButton.Position = UDim2.new(0, 340, 0, 110)  -- ← 左に寄せた位置
+copyButton.Position = UDim2.new(0, 340, 0, 110)
 copyButton.BackgroundColor3 = Color3.fromRGB(135, 206, 250)
 copyButton.Text = "📄"
 copyButton.Font = Enum.Font.GothamBold
 copyButton.TextSize = 18
 copyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+copyButton.ZIndex = 102
 
 local copyButtonCorner = Instance.new("UICorner", copyButton)
 copyButtonCorner.CornerRadius = UDim.new(0, 6)
@@ -205,7 +227,6 @@ copyButton.MouseButton1Click:Connect(function()
 	end
 end)
 
--- 自動更新トグル用
 local updateToggle = Instance.new("TextButton", mainTab)
 updateToggle.Size = UDim2.new(0.9, 0, 0, 30)
 updateToggle.Position = UDim2.new(0.05, 0, 1, -40)
@@ -214,6 +235,7 @@ updateToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
 updateToggle.Font = Enum.Font.GothamBold
 updateToggle.TextSize = 16
 updateToggle.Text = "自動更新: OFF"
+updateToggle.ZIndex = 102
 
 local toggleUICorner = Instance.new("UICorner", updateToggle)
 toggleUICorner.CornerRadius = UDim.new(0, 10)
@@ -222,13 +244,15 @@ local autoUpdate = false
 updateToggle.MouseButton1Click:Connect(function()
 	autoUpdate = not autoUpdate
 	updateToggle.Text = "自動更新: " .. (autoUpdate and "ON" or "OFF")
+	if autoUpdate then
+		updateServerInfo()
+	end
 end)
 
--- 情報の自動更新処理
 local function updateServerInfo()
 	playersLabel.Text = "プレイヤー数: " .. #game.Players:GetPlayers()
 	maxPlayersLabel.Text = "最大プレイヤー数: " .. game.Players.MaxPlayers
-	gameNameLabel.Text = "ゲーム名: " .. game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
+	gameNameLabel.Text = "ゲーム名: " .. MarketplaceService:GetProductInfo(game.PlaceId).Name
 end
 
 updateServerInfo()
@@ -243,51 +267,52 @@ game.Players.PlayerRemoving:Connect(function()
 	end
 end)
 
--- Settingタブに「スクリプトを閉じる」ボタンと「完全に閉じる」ボタン
+-- Settingタブに閉じる＆終了ボタン
 local closeBtn = Instance.new("TextButton", settingTab)
 closeBtn.Size = UDim2.new(0.9, 0, 0, 40)
 closeBtn.Position = UDim2.new(0.05, 0, 0, 10)
 closeBtn.BackgroundColor3 = Color3.fromRGB(255, 182, 193)
 closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 closeBtn.Font = Enum.Font.GothamBold
-closeBtn.TextSize = 18
-closeBtn.Text = "スクリプトを閉じる"
+closeBtn.TextSize = 20
+closeBtn.Text = "ウィンドウを閉じる"
+closeBtn.ZIndex = 102
 
 local closeCorner = Instance.new("UICorner", closeBtn)
-closeCorner.CornerRadius = UDim.new(0, 10)
+closeCorner.CornerRadius = UDim.new(0, 12)
 
 closeBtn.MouseButton1Click:Connect(function()
 	frame.Visible = false
 end)
 
-local fullCloseBtn = Instance.new("TextButton", settingTab)
-fullCloseBtn.Size = UDim2.new(0.9, 0, 0, 40)
-fullCloseBtn.Position = UDim2.new(0.05, 0, 0, 60)
-fullCloseBtn.BackgroundColor3 = Color3.fromRGB(220, 20, 60)
-fullCloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-fullCloseBtn.Font = Enum.Font.GothamBold
-fullCloseBtn.TextSize = 18
-fullCloseBtn.Text = "スクリプトを完全に閉じる"
+local quitBtn = Instance.new("TextButton", settingTab)
+quitBtn.Size = UDim2.new(0.9, 0, 0, 40)
+quitBtn.Position = UDim2.new(0.05, 0, 0, 60)
+quitBtn.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
+quitBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+quitBtn.Font = Enum.Font.GothamBold
+quitBtn.TextSize = 20
+quitBtn.Text = "スクリプトを終了"
+quitBtn.ZIndex = 102
 
-local fullCloseCorner = Instance.new("UICorner", fullCloseBtn)
-fullCloseCorner.CornerRadius = UDim.new(0, 10)
+local quitCorner = Instance.new("UICorner", quitBtn)
+quitCorner.CornerRadius = UDim.new(0, 12)
 
-fullCloseBtn.MouseButton1Click:Connect(function()
+quitBtn.MouseButton1Click:Connect(function()
 	screenGui:Destroy()
 end)
 
--- 最初にMainタブを表示
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if not gameProcessed then
+		if input.KeyCode == Enum.KeyCode.RightControl then
+			frame.Visible = not frame.Visible
+		end
+	end
+end)
+
+
 for _, tabPage in pairs(tabs) do
 	tabPage.Visible = false
 end
 mainTab.Visible = true
-
--- 右Ctrlで開閉
-local UserInputService = game:GetService("UserInputService")
-local visible = true
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-	if not gameProcessed and input.KeyCode == Enum.KeyCode.RightControl then
-		visible = not visible
-		frame.Visible = visible
-	end
-end)
